@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat Bot</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <style>
+        body {
+            background: #f4f4f4;
+        }
+        #chatbox {
+            height: 750px;
+            overflow-y: scroll;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.05);
+        }
+        #textInput {
+            border-radius: 15px 0 0 15px;
+            border: none;
+            box-shadow: none;
+        }
+        #buttonInput {
+            border-radius: 0 15px 15px 0;
+            border: none;
+            background: #007bff;
+            color: white;
+            box-shadow: none;
+        }
+        .bg-info {
+            color: #fff;
+            background-color: #17a2b8 !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-12 col-lg-8 mx-auto">
+                <div id="chatbox" class="border p-3 mb-3"></div>
+                <div class="input-group">
+                    <input id="textInput" type="text" class="form-control" placeholder="Enter your message">
+                    <div class="input-group-append">
+                        <button id="buttonInput" class="btn btn-primary">Send</button>
+                    </div>
+                </div>
+                <form id="upload-form" action="/upload" method="post" enctype="multipart/form-data" class="mt-3">
+                    <div class="input-group">
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="inputGroupFile04" name="file">
+                            <label class="custom-file-label" for="inputGroupFile04">Choose file</label>
+                        </div>
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-secondary" type="submit">Upload</button>
+                        </div>
+                    </div>
+                </form>
+                <p id="upload-result" class="mt-2 text-center"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // document.getElementById('buttonInput').onclick = function() {
+        //     var input = document.getElementById('textInput').value;
+        //     document.getElementById('chatbox').innerHTML += '<div class="p-3 mb-2 bg-light text-dark">You: ' + input + '</div>';
+        //     fetch(`/get?msg=${input}`).then(response => response.json()).then(data => {
+        //         if (data.image !== null) {
+        //             document.getElementById('chatbox').innerHTML += '<div class="p-3 mb-2 bg-info text-white">Bot: <img src="/get_image/' +  data.image + '" class="img-fluid"></div>';
+        //         }
+        //         document.getElementById('chatbox').innerHTML += '<div class="p-3 mb-2 bg-info text-white">Bot: ' + '<pre>'+ data.text + '</pre>' + '</div>';
+        //         var chatbox = document.getElementById('chatbox');
+        //         chatbox.scrollTop = chatbox.scrollHeight;
+        //     });
+        //     document.getElementById('textInput').value = '';
+        // };
+        document.getElementById('buttonInput').onclick = function() {
+            var input = document.getElementById('textInput').value;
+            document.getElementById('chatbox').innerHTML += '<div class="p-3 mb-2 bg-light text-dark">You: ' + input + '</div>';
+            fetch(`/get?msg=${input}`).then(response => response.json()).then(data => {
+            document.getElementById('chatbox').innerHTML += '<div class="p-3 mb-2 bg-info text-white">Bot: ' + '<pre>'+ data.text + '</pre>' + '</div>';
+            if (data.image !== null) {
+                document.getElementById('chatbox').innerHTML += '<div class="p-3 mb-2 bg-info text-white">Bot: <img src="/get_image/' +  data.image + '" class="img-fluid"></div>';
+            }
+            var chatbox = document.getElementById('chatbox');
+            chatbox.scrollTop = chatbox.scrollHeight;
+            });
+            document.getElementById('textInput').value = '';
+        };
+
+        document.getElementById('upload-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            var formData = new FormData(event.target);
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('upload-result').textContent = data;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+
+        // Add event listener to update label text with file name
+        document.getElementById('inputGroupFile04').addEventListener('change', function(event) {
+            var input = event.target;
+            var label = input.nextElementSibling;
+            label.innerText = input.files[0].name;
+        });
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>
